@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         py-version: [3.7, 3.8, 3.9]
-        os: [ubuntu-20.04, ubuntu-18.04, macos-latest]
+        os: [ubuntu-20.04, macos-latest, windows-latest]
 
     steps:
     - uses: actions/checkout@v2
@@ -29,9 +29,5 @@ jobs:
 #        python -m pip install --upgrade pip
 #        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Run tests
-      run: |
-        echo `git diff-tree --no-commit-id --name-only -r \`git log --pretty=format:'%h' -n 1\`` \
-        | grep -Eq "*.py*" \
-        && python -m unittest discover -v -s ./tests -p test_*.py \
-        || echo "No python file changed, skipping tests."
+      run: python -m unittest discover -v -s ./tests -p test_*.py 
 
