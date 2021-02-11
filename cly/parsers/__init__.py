@@ -23,7 +23,7 @@ This package basically re-exports the classes defined in
 that increase code legibility and ease of use.
 """
 
-from . import parser, decorated
+from . import parser  # , decorated
 
 # DecoratedParser = decorated.Parser
 Parser = parser.Parser

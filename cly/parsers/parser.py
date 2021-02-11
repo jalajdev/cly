@@ -69,7 +69,7 @@ class Parser:
             Whether to use strict mode or not. In strict mode, the
             `long_name` of all arguments and flags *must* start with a
             `--` and all `short_name`s must start with a `-`. All short
-            names can only be a single character alphanumeric character.
+            names can only be a single character alphanumeric string.
 
             Disabling `strict_mode` also disables some other functions.
             For example, when strict mode is enabled, the user can
@@ -106,11 +106,12 @@ class Parser:
     def add_argument(
         self,
         long_name: str,
-        short_name: str,
         description: str,
+        short_name: Union[str, None] = None,
         required: bool = True,
         indefinite: bool = False,
         data_type: Union[list, tuple, str, int] = str,
+        default: Any = None,
     ) -> None:
         """
         Add an argument to the parser registry.
@@ -121,7 +122,7 @@ class Parser:
             The longer name of the argument. Generally of the form
             `--<actual-name>`. For example: $ git add --all.
 
-        - short_name: [str]
+        - short_name: [str, default: None]
             The short name of the argument. Generally of the form
             `-<a-single-char>`. Example: $ git add -A.
 
@@ -140,6 +141,11 @@ class Parser:
             that list/tuple can be used only if `indefinite` is set
             to True
 
+        - default: [Any, default: None]
+            The value that the argument takes if none is supplied by
+            the user. This argument will have effect only if `argument`
+            is set to False.
+
         Returns: None
 
         Raises:
@@ -147,6 +153,55 @@ class Parser:
         - ValueError: If the values of the arguments `indefinite`
             and `data_type` are incompatible.
         """
+
+        # Some basic checks
+        if (data_type == tuple or data_type == list) and not indefinite:
+            raise ValueError(
+                "Invalid combination in argument. "
+                + f"Cannot use data type {data_type} when indefinite is False."
+            )
+
+        if not len(long_name) > 0 or (
+            short_name is not None and not len(short_name) > 0
+        ):
+            raise ValueError("Short name and Long names can't be empty strings.")
+
+        if not long_name.replace("-", "").isalnum():
+            raise ValueError(
+                "Long name must be an alphanumeric string with " "the exception of `-`."
+            )
+        if short_name and not short_name.replace("-", "").isalnum():
+            raise ValueError("Short name must be an alphanumeric character.")
+
+        # Check style if srict mode is enabled
+        if self._options["strict_mode"]:
+            if not long_name.startswith("--"):
+                raise ValueError(
+                    f"Expected long name ('{long_name}') to start with a `-`"
+                )
+
+            if short_name:
+                if not long_name.startswith("-"):
+                    raise ValueError(
+                        f"Expected short name ('{short_name}') to start with a `-`"
+                    )
+                if len(short_name) != 2:
+                    raise ValueError(
+                        "Exepcted short name of lengh 1 but instead "
+                        f"got short name of length {len(short_name)-1}."
+                    )
+
+        self.registry.append(
+            Argument(
+                long_name,
+                short_name,
+                description,
+                required,
+                indefinite,
+                data_type,
+                (None if required else default),
+            )
+        )
 
     def arg(spec: str) -> None:
         """
@@ -183,7 +238,10 @@ class Argument:
     long_name: str
     short_name: str
     description: str
-    value: Any = None
     required: bool = True
     indefinite: bool = False
     data_type: Union[list, tuple, str, int] = str
+
+    # This is the value of the argumen as supplied by the user
+    # It will be set once parsing is complete.
+    value: Any = None

@@ -29,8 +29,8 @@ setup(
     version="0.1.0.dev1",
     description="An amazing tool to make powerful and robust command line interfaces",
     long_description=read_file("./README.md"),
-    long_description_conotent_type="text/markdown",
-    url="",  # TODO
+    long_description_content_type="text/markdown",
+    url="https://github.com/jalajdev/cly",
     classifiers=[
         "Development Status :: 1 - Planning",
         "Environment :: Console",
