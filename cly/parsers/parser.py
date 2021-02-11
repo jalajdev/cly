@@ -15,8 +15,9 @@
 #    along with cly.  If not, see <https://www.gnu.org/licenses/>
 
 import sys
-from typing import Any, List, Union
 from dataclasses import dataclass
+from typing import Any, List, Union
+from cly.errors import InvalidLongName, InvalidShortName
 
 
 class Parser:
@@ -167,26 +168,26 @@ class Parser:
             raise ValueError("Short name and Long names can't be empty strings.")
 
         if not long_name.replace("-", "").isalnum():
-            raise ValueError(
+            raise InvalidLongName(
                 "Long name must be an alphanumeric string with " "the exception of `-`."
             )
         if short_name and not short_name.replace("-", "").isalnum():
-            raise ValueError("Short name must be an alphanumeric character.")
+            raise InvalidShortName("Short name must be an alphanumeric character.")
 
         # Check style if srict mode is enabled
         if self._options["strict_mode"]:
             if not long_name.startswith("--"):
-                raise ValueError(
+                raise InvalidLongName(
                     f"Expected long name ('{long_name}') to start with a `-`"
                 )
 
             if short_name:
                 if not long_name.startswith("-"):
-                    raise ValueError(
+                    raise InvalidShortName(
                         f"Expected short name ('{short_name}') to start with a `-`"
                     )
                 if len(short_name) != 2:
-                    raise ValueError(
+                    raise InvalidShortName(
                         "Exepcted short name of lengh 1 but instead "
                         f"got short name of length {len(short_name)-1}."
                     )

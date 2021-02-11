@@ -16,6 +16,7 @@
 
 import unittest
 from cly.parsers import Parser
+from cly.errors import InvalidShortName, InvalidLongName
 
 
 class AddArgumentMethodStylesTest(unittest.TestCase):
@@ -38,13 +39,13 @@ class AddArgumentMethodStylesTest(unittest.TestCase):
     def test_special_char_in_long_name(self):
 
         # Long name with special character
-        with self.assertRaises(ValueError):
+        with self.assertRaises(InvalidLongName):
             self.parser.add_argument("$#as", "")
 
     def test_special_char_in_short_name(self):
 
         # Short name with special character
-        with self.assertRaises(ValueError):
+        with self.assertRaises(InvalidShortName):
             self.parser.add_argument("abcd", "", "^&")
 
     def test_hyphen_is_valid_in_long_name(self):
@@ -52,7 +53,7 @@ class AddArgumentMethodStylesTest(unittest.TestCase):
         # Long name with '-' must not count as special character
         try:
             self.parser.add_argument("--ab-cd", "")
-        except ValueError:
+        except Exception:
             self.assertTrue(False)
 
     def test_hyphen_is_valid_in_short_name(self):
@@ -60,5 +61,5 @@ class AddArgumentMethodStylesTest(unittest.TestCase):
         # Short name with '-' must not count as special character
         try:
             self.parser.add_argument("--abcd", "", short_name="-c")
-        except ValueError:
+        except Exception:
             self.assertTrue(False)
