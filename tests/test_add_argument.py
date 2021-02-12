@@ -19,7 +19,7 @@ from cly.parsers import Parser
 from cly.errors import InvalidShortName, InvalidLongName
 
 
-class AddArgumentMethodStylesTest(unittest.TestCase):
+class StylesTest(unittest.TestCase):
     def setUp(self) -> None:
         self.parser = Parser()
         return super().setUp()
@@ -63,3 +63,68 @@ class AddArgumentMethodStylesTest(unittest.TestCase):
             self.parser.add_argument("--abcd", "", short_name="-c")
         except Exception:
             self.assertTrue(False)
+
+
+# The above tests should also pass with strict mode
+class StrictModeStylesTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.parser = Parser(strict_mode=True)
+        return super().setUp()
+
+    def test_empty_long_name(self):
+
+        # Empty Long name
+        with self.assertRaises(ValueError):
+            self.parser.add_argument("", "")
+
+    def test_empty_short_name(self):
+
+        # Empty short name
+        with self.assertRaises(ValueError):
+            self.parser.add_argument("--abcd", "", short_name="")
+
+    def test_special_char_in_long_name(self):
+
+        # Long name with special character
+        with self.assertRaises(InvalidLongName):
+            self.parser.add_argument("--$#as", "")
+
+    def test_special_char_in_short_name(self):
+
+        # Short name with special character
+        with self.assertRaises(InvalidShortName):
+            self.parser.add_argument("--abcd", "", "-&")
+
+    def test_hyphen_is_valid_in_long_name(self):
+
+        # Long name with '-' must not count as special character
+        try:
+            self.parser.add_argument("--ab-cd", "")
+        except Exception:
+            self.assertTrue(False)
+
+    def test_hyphen_is_valid_in_short_name(self):
+
+        # Short name with '-' must not count as special character
+        try:
+            self.parser.add_argument("--abcd", "", short_name="-c")
+        except Exception:
+            self.assertTrue(False)
+
+    def test_long_name_starts_with_double_hyphen(self):
+
+        # Long name starting with something other than `--`.
+        with self.assertRaises(InvalidLongName):
+            self.parser.add_argument("abcd", "", "-b")
+
+    def test_short_name_starts_with_hyphen(self):
+
+        # Short name starting with something other than `-`.
+        with self.assertRaises(InvalidShortName):
+            self.parser.add_argument("--abcd", "", "cb")
+
+    def test_fixed_length_short_name(self):
+
+        # Short name too long.
+        with self.assertRaises(InvalidShortName):
+            self.parser.add_argument("--abcd", "", "-cb")

@@ -182,7 +182,7 @@ class Parser:
                 )
 
             if short_name:
-                if not long_name.startswith("-"):
+                if not short_name.startswith("-"):
                     raise InvalidShortName(
                         f"Expected short name ('{short_name}') to start with a `-`"
                     )
