@@ -14,6 +14,7 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with cly.  If not, see <https://www.gnu.org/licenses/>
 
+import re
 import sys
 from dataclasses import dataclass
 from typing import Any, Dict, List, Union
@@ -129,7 +130,7 @@ class Parser:
         required: bool = True,
         indefinite: bool = False,
         default: Any = None,
-    ) -> None:
+    ) -> Argument:
         """
         Add an argument to the parser registry.
 
@@ -157,7 +158,7 @@ class Parser:
             the user. This argument will have effect only if `argument`
             is set to False.
 
-        Returns: None
+        Returns: An instance of the `Argument` class.
 
         Raises:
 
@@ -223,7 +224,9 @@ class Parser:
         if short_name:
             self.registry[short_name] = _obj
 
-    def arg(spec: str) -> None:
+        return _obj
+
+    def add_arg(self, spec: str) -> Argument:
         """
         Shorthand for the function `add_argument`. Instead of all the
         different parameters, you can provide just a singe string
@@ -235,7 +238,7 @@ class Parser:
             The string that specifies the whole specification.
             It must be of this format:
 
-            `"<short-name> <long-name> [<description>] <required>
+            `"<long-name> <short-name> [<description>], <required>,
             <indefinite>"`
 
             Please take special care of the spaces present and that
@@ -243,3 +246,31 @@ class Parser:
             you have brackets in your description, you can escape
             it using a backslash (`\\`), like this: `\\[` or `\\]`.
         """
+        SPEC_RE = (
+            "(?P<long_name>[a-zA-Z0-9\\-_]+)( (?P<short_name>[a-zA-Z0-9\\-_]+))? "
+            "(?P<description>\\[.+(?<!\\\\)\\])"
+            "(, (?P<required>[a-zA-Z]+)(, (?P<indefinite>[a-zA-Z]+))?)?"
+        )
+        _spec = re.match(SPEC_RE, spec)
+        if _spec is None:
+            # The Regex didn't match, program should go over finer
+            # detatils of the provided spec and pin-point the problem.
+
+            # TODO
+            raise Exception("Invalid spec provided")
+
+        _spec = _spec.groupdict()
+
+        # Fallsback to True by default
+        _spec["required"] = str(_spec.get("required")).lower() != "false"
+
+        # Fallsback to False by default
+        _spec["indefinite"] = str(_spec.get("indefinite")).lower() == "true"
+
+        _spec["description"] = (
+            _spec.get("description", "[]")[1:-1]  # Remove the enclosing brackets
+            # Replace escaped brackets with good ones
+            .replace("\\[", "[").replace("\\]", "]")
+        )
+
+        return self.add_argument(**_spec)
