@@ -34,19 +34,7 @@ class StylesTest(unittest.TestCase):
 
         # Empty short name
         with self.assertRaises(ValueError):
-            self.parser.add_argument("abcd", "", short_name="")
-
-    def test_special_char_in_long_name(self):
-
-        # Long name with special character
-        with self.assertRaises(InvalidLongName):
-            self.parser.add_argument("$#as", "")
-
-    def test_special_char_in_short_name(self):
-
-        # Short name with special character
-        with self.assertRaises(InvalidShortName):
-            self.parser.add_argument("abcd", "", "^&")
+            self.parser.add_argument("--abcd", "", short_name="")
 
     def test_hyphen_is_valid_in_long_name(self):
 

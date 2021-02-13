@@ -180,6 +180,11 @@ class Parser:
                 + f"Cannot use data type {data_type} when indefinite is False."
             )
 
+        if not len(long_name) > 0 or (
+            short_name is not None and not len(short_name) > 0
+        ):
+            raise ValueError("Short name and/or Long names can't be empty strings.")
+
         # Redundancy checks
         if long_name in self.registry:
             raise InvalidLongName(
@@ -193,23 +198,17 @@ class Parser:
                 " It has been registered already."
             )
 
-        if not len(long_name) > 0 or (
-            short_name is not None and not len(short_name) > 0
-        ):
-            raise ValueError("Short name and Long names can't be empty strings.")
-
-        if not long_name.replace("-", "").isalnum():
-            raise InvalidLongName(
-                "Long name must be an alphanumeric string with " "the exception of `-`."
-            )
-        if short_name and not short_name.replace("-", "").isalnum():
-            raise InvalidShortName("Short name must be an alphanumeric character.")
-
         # Check style if srict mode is enabled
         if self._options["strict_mode"]:
             if not long_name.startswith("--"):
                 raise InvalidLongName(
                     f"Expected long name ('{long_name}') to start with a `-`"
+                )
+
+            if not long_name.replace("-", "").isalnum():
+                raise InvalidLongName(
+                    "Long name must be an alphanumeric string with "
+                    "the exception of `-`."
                 )
 
             if short_name:
@@ -221,6 +220,10 @@ class Parser:
                     raise InvalidShortName(
                         "Exepcted short name of lengh 1 but instead "
                         f"got short name of length {len(short_name)-1}."
+                    )
+                if not short_name.replace("-", "").isalnum():
+                    raise InvalidShortName(
+                        "Short name must be an alphanumeric character."
                     )
 
         _obj = Argument(
