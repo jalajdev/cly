@@ -128,3 +128,19 @@ class StrictModeStylesTest(unittest.TestCase):
         # Short name too long.
         with self.assertRaises(InvalidShortName):
             self.parser.add_argument("--abcd", "", "-cb")
+
+
+class FunctionalityTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.parser = Parser()
+        return super().setUp()
+
+    def test_redundancy_error_in_long_name(self):
+        self.parser.add_argument("--name1", "")
+        with self.assertRaises(InvalidLongName):
+            self.parser.add_argument("--name1", "")
+
+    def test_redundancy_error_in_short_name(self):
+        self.parser.add_argument("--name1", "", "-n")
+        with self.assertRaises(InvalidShortName):
+            self.parser.add_argument("--name2", "", "-n")

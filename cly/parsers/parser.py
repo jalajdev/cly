@@ -16,8 +16,26 @@
 
 import sys
 from dataclasses import dataclass
-from typing import Any, List, Union
+from typing import Any, Dict, List, Union
 from cly.errors import InvalidLongName, InvalidShortName
+
+
+@dataclass
+class Argument:
+    """
+    The base data class to represent an argument
+    """
+
+    long_name: str
+    short_name: str
+    description: str
+    required: bool = True
+    indefinite: bool = False
+    data_type: Union[list, tuple, str, int] = str
+
+    # This is the value of the argument as supplied by the user
+    # It will be set once parsing is complete.
+    value: Any = None
 
 
 class Parser:
@@ -96,7 +114,7 @@ class Parser:
             "strict_mode": strict_mode,
         }
         self.argtree = []
-        self.registry: List = []
+        self.registry: Dict[str, Argument] = {}
 
     def parse(self, args: List[str] = sys.argv[1:]) -> None:
         """
@@ -162,6 +180,19 @@ class Parser:
                 + f"Cannot use data type {data_type} when indefinite is False."
             )
 
+        # Redundancy checks
+        if long_name in self.registry:
+            raise InvalidLongName(
+                f"The long name '{long_name}' is redundant."
+                " It has been registered already."
+            )
+
+        if short_name and short_name in self.registry:
+            raise InvalidShortName(
+                f"The long name '{short_name}' is redundant."
+                " It has been registered already."
+            )
+
         if not len(long_name) > 0 or (
             short_name is not None and not len(short_name) > 0
         ):
@@ -192,17 +223,19 @@ class Parser:
                         f"got short name of length {len(short_name)-1}."
                     )
 
-        self.registry.append(
-            Argument(
-                long_name,
-                short_name,
-                description,
-                required,
-                indefinite,
-                data_type,
-                (None if required else default),
-            )
+        _obj = Argument(
+            long_name,
+            short_name,
+            description,
+            required,
+            indefinite,
+            data_type,
+            (None if required else default),
         )
+
+        self.registry[long_name] = _obj
+        if short_name:
+            self.registry[short_name] = _obj
 
     def arg(spec: str) -> None:
         """
@@ -228,21 +261,3 @@ class Parser:
             have default values `True`, `False` and `str`
             respectively.
         """
-
-
-@dataclass
-class Argument:
-    """
-    The base data class to represent an argument
-    """
-
-    long_name: str
-    short_name: str
-    description: str
-    required: bool = True
-    indefinite: bool = False
-    data_type: Union[list, tuple, str, int] = str
-
-    # This is the value of the argumen as supplied by the user
-    # It will be set once parsing is complete.
-    value: Any = None
