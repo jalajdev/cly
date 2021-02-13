@@ -31,7 +31,6 @@ class Argument:
     description: str
     required: bool = True
     indefinite: bool = False
-    data_type: Union[list, tuple, str, int] = str
 
     # This is the value of the argument as supplied by the user
     # It will be set once parsing is complete.
@@ -129,7 +128,6 @@ class Parser:
         short_name: Union[str, None] = None,
         required: bool = True,
         indefinite: bool = False,
-        data_type: Union[list, tuple, str, int] = str,
         default: Any = None,
     ) -> None:
         """
@@ -154,12 +152,6 @@ class Parser:
         - indefinite: [bool, default: False]
             Does this accept indefinite number of values?
 
-        - data_type: [Union[str, int, tuple, list], default: str]
-            The data type to convert the provided value into. The
-            only supported types are str, int, list and tuple. Note
-            that list/tuple can be used only if `indefinite` is set
-            to True
-
         - default: [Any, default: None]
             The value that the argument takes if none is supplied by
             the user. This argument will have effect only if `argument`
@@ -172,14 +164,6 @@ class Parser:
         - ValueError: If the values of the arguments `indefinite`
             and `data_type` are incompatible.
         """
-
-        # Some basic checks
-        if (data_type == tuple or data_type == list) and not indefinite:
-            raise ValueError(
-                "Invalid combination in argument. "
-                + f"Cannot use data type {data_type} when indefinite is False."
-            )
-
         if not len(long_name) > 0 or (
             short_name is not None and not len(short_name) > 0
         ):
@@ -232,7 +216,6 @@ class Parser:
             description,
             required,
             indefinite,
-            data_type,
             (None if required else default),
         )
 
@@ -253,14 +236,10 @@ class Parser:
             It must be of this format:
 
             `"<short-name> <long-name> [<description>] <required>
-            <indefinite> <data_type>"`
+            <indefinite>"`
 
             Please take special care of the spaces present and that
             description must be enclosed within brackets (`[]`). If
             you have brackets in your description, you can escape
             it using a backslash (`\\`), like this: `\\[` or `\\]`.
-            Just like the `add_argument` function, the `required`,
-            `indefinite` and `data_type` values are optional and
-            have default values `True`, `False` and `str`
-            respectively.
         """
