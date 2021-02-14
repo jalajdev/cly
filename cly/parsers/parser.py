@@ -16,26 +16,9 @@
 
 import re
 import sys
-from dataclasses import dataclass
+from cly.utils import Argument
 from typing import Any, Dict, List, Union
 from cly.errors import InvalidLongName, InvalidShortName
-
-
-@dataclass
-class Argument:
-    """
-    The base data class to represent an argument
-    """
-
-    long_name: str
-    short_name: str
-    description: str
-    required: bool = True
-    indefinite: bool = False
-
-    # This is the value of the argument as supplied by the user
-    # It will be set once parsing is complete.
-    value: Any = None
 
 
 class Parser:
@@ -212,12 +195,12 @@ class Parser:
                     )
 
         _obj = Argument(
-            long_name,
-            short_name,
-            description,
-            required,
-            indefinite,
-            (None if required else default),
+            long_name=long_name,
+            description=description,
+            short_name=short_name,
+            required=required,
+            indefinite=indefinite,
+            value=(None if required else default),
         )
 
         self.registry[long_name] = _obj
