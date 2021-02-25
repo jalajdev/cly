@@ -16,7 +16,7 @@
 
 import re
 import sys
-from cly.utils import Argument
+from cly.utils import Argument, Flag
 from typing import Any, Dict, List, Union
 from cly.errors import InvalidLongName, InvalidShortName
 
@@ -121,11 +121,11 @@ class Parser:
 
         - long_name: [str]
             The longer name of the argument. Generally of the form
-            `--<actual-name>`. For example: $ git add --all.
+            `--<actual-name>`. For example: $ tsc --project file.
 
         - short_name: [str, default: None]
             The short name of the argument. Generally of the form
-            `-<a-single-char>`. Example: $ git add -A.
+            `-<a-single-char>`. Example: $ tsc -p file.
 
         - description: [str]
             The text to show in help menus for this argument.
@@ -257,3 +257,129 @@ class Parser:
         )
 
         return self.add_argument(**_spec)
+
+    def add_flag(
+        self,
+        long_name: str,
+        description: str,
+        short_name: Union[str, None] = None,
+    ) -> Flag:
+        """
+        Add a flag to the parser registry. A flag is just like an
+        argument, the only difference being that an argument can take
+        any value but a flag doesn't accept any values, rather it is
+        either present or not. Kind of a boolean.
+
+        Args:
+
+        - long_name: [str]
+            The longer name of the flag. Generally of the form
+            `--<actual-name>`. For example: $ git add --all.
+
+        - short_name: [str, default: None]
+            The short name of the flag. Generally of the form
+            `-<a-single-char>`. Example: $ git add -A.
+
+        - description: [str]
+            The text to show in help menus for this flag.
+
+        Returns: An instance of the `Flag` class.
+        """
+        if not len(long_name) > 0 or (
+            short_name is not None and not len(short_name) > 0
+        ):
+            raise ValueError("Short name and/or Long names can't be empty strings.")
+
+        # Redundancy checks
+        if long_name in self.registry:
+            raise InvalidLongName(
+                f"The long name '{long_name}' is redundant."
+                " It has been registered already."
+            )
+
+        if short_name and short_name in self.registry:
+            raise InvalidShortName(
+                f"The long name '{short_name}' is redundant."
+                " It has been registered already."
+            )
+
+        # Check style if srict mode is enabled
+        if self._options["strict_mode"]:
+            if not long_name.startswith("--"):
+                raise InvalidLongName(
+                    f"Expected long name ('{long_name}') to start with a `-`"
+                )
+
+            if not long_name.replace("-", "").isalnum():
+                raise InvalidLongName(
+                    "Long name must be an alphanumeric string with "
+                    "the exception of `-`."
+                )
+
+            if short_name:
+                if not short_name.startswith("-"):
+                    raise InvalidShortName(
+                        f"Expected short name ('{short_name}') to start with a `-`"
+                    )
+                if len(short_name) != 2:
+                    raise InvalidShortName(
+                        "Exepcted short name of lengh 1 but instead "
+                        f"got short name of length {len(short_name)-1}."
+                    )
+                if not short_name.replace("-", "").isalnum():
+                    raise InvalidShortName(
+                        "Short name must be an alphanumeric character."
+                    )
+
+        _obj = Flag(
+            long_name=long_name,
+            description=description,
+            short_name=short_name,
+        )
+
+        self.registry[long_name] = _obj
+        if short_name:
+            self.registry[short_name] = _obj
+
+        return _obj
+
+    def flag(self, spec: str) -> Flag:
+        """
+        Shorthand for the function `add_flag`. Instead of all the
+        different parameters, you can provide just a singe string
+        consisting the specification of the argument.
+
+        Args:
+
+        - spec: [str]
+            The string that specifies the whole specification.
+            It must be of this format:
+
+            `"<long-name> <short-name> [<description>]"`
+
+            Please take special care of the spaces present and that
+            description must be enclosed within brackets (`[]`). If
+            you have brackets in your description, you can escape
+            it using a backslash (`\\`), like this: `\\[` or `\\]`.
+        """
+        SPEC_RE = (
+            "(?P<long_name>[a-zA-Z0-9\\-_]+)( (?P<short_name>[a-zA-Z0-9\\-_]+))? "
+            "(?P<description>\\[.+(?<!\\\\)\\])"
+        )
+        _spec = re.match(SPEC_RE, spec)
+        if _spec is None:
+            # The Regex didn't match, program should go over finer
+            # detatils of the provided spec and pin-point the problem.
+
+            # TODO
+            raise Exception("Invalid spec provided")
+
+        _spec = _spec.groupdict()
+
+        _spec["description"] = (
+            _spec.get("description", "[]")[1:-1]  # Remove the enclosing brackets
+            # Replace escaped brackets with good ones
+            .replace("\\[", "[").replace("\\]", "]")
+        )
+
+        return self.add_flag(**_spec)
