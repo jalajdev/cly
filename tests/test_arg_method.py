@@ -25,52 +25,52 @@ class TestArgMethodRegExps(unittest.TestCase):
 
     def test_basic_sample(self):
         arg = self.parser.add_arg("--long-name -s [description]")
-        self.assertEquals(arg.long_name, "--long-name")
-        self.assertEquals(arg.short_name, "-s")
-        self.assertEquals(arg.description, "description")
-        self.assertEquals(arg.required, True)
-        self.assertEquals(arg.indefinite, False)
+        self.assertEqual(arg.long_name, "--long-name")
+        self.assertEqual(arg.short_name, "-s")
+        self.assertEqual(arg.description, "description")
+        self.assertEqual(arg.required, True)
+        self.assertEqual(arg.indefinite, False)
 
     def test_ommitted_short_name(self):
         arg = self.parser.add_arg("--long-name [description]")
-        self.assertEquals(arg.long_name, "--long-name")
-        self.assertEquals(arg.short_name, None)
-        self.assertEquals(arg.description, "description")
-        self.assertEquals(arg.required, True)
-        self.assertEquals(arg.indefinite, False)
+        self.assertEqual(arg.long_name, "--long-name")
+        self.assertEqual(arg.short_name, None)
+        self.assertEqual(arg.description, "description")
+        self.assertEqual(arg.required, True)
+        self.assertEqual(arg.indefinite, False)
 
     def test_complex_description(self):
         arg = self.parser.add_arg(
             "--long-name -s "
             "[This is a big description, with \\[brackets\\] and spaces]"
         )
-        self.assertEquals(arg.long_name, "--long-name")
-        self.assertEquals(arg.short_name, "-s")
-        self.assertEquals(
+        self.assertEqual(arg.long_name, "--long-name")
+        self.assertEqual(arg.short_name, "-s")
+        self.assertEqual(
             arg.description, "This is a big description, with [brackets] and spaces"
         )
-        self.assertEquals(arg.required, True)
-        self.assertEquals(arg.indefinite, False)
+        self.assertEqual(arg.required, True)
+        self.assertEqual(arg.indefinite, False)
 
     def test_indefinite_parameter(self):
         arg = self.parser.add_arg("--long-name -s [description], False")
-        self.assertEquals(arg.long_name, "--long-name")
-        self.assertEquals(arg.short_name, "-s")
-        self.assertEquals(arg.description, "description")
-        self.assertEquals(arg.required, True)
-        self.assertEquals(arg.indefinite, False)
+        self.assertEqual(arg.long_name, "--long-name")
+        self.assertEqual(arg.short_name, "-s")
+        self.assertEqual(arg.description, "description")
+        self.assertEqual(arg.required, True)
+        self.assertEqual(arg.indefinite, False)
 
     def test_indefinite_parameter_case_insensitive(self):
         arg = self.parser.add_arg("--long-name -s [description], false")
-        self.assertEquals(arg.indefinite, False)
+        self.assertEqual(arg.indefinite, False)
 
     def test_default_parameter(self):
         arg = self.parser.add_arg("--long-name -s [description], false, default value")
-        self.assertEquals(arg.long_name, "--long-name")
-        self.assertEquals(arg.short_name, "-s")
-        self.assertEquals(arg.description, "description")
-        self.assertEquals(arg.required, False)
-        self.assertEquals(arg.indefinite, False)
+        self.assertEqual(arg.long_name, "--long-name")
+        self.assertEqual(arg.short_name, "-s")
+        self.assertEqual(arg.description, "description")
+        self.assertEqual(arg.required, False)
+        self.assertEqual(arg.indefinite, False)
         self.assertEqual(arg.value, "default value")
 
     def test_empty_default_parameter(self):

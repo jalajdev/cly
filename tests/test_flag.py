@@ -25,23 +25,23 @@ class TestFlagMethodRegExps(unittest.TestCase):
 
     def test_basic_sample(self):
         flg = self.parser.flag("--long-name -s [description]")
-        self.assertEquals(flg.long_name, "--long-name")
-        self.assertEquals(flg.short_name, "-s")
-        self.assertEquals(flg.description, "description")
+        self.assertEqual(flg.long_name, "--long-name")
+        self.assertEqual(flg.short_name, "-s")
+        self.assertEqual(flg.description, "description")
 
     def test_ommitted_short_name(self):
         flg = self.parser.flag("--long-name [description]")
-        self.assertEquals(flg.long_name, "--long-name")
-        self.assertEquals(flg.short_name, None)
-        self.assertEquals(flg.description, "description")
+        self.assertEqual(flg.long_name, "--long-name")
+        self.assertEqual(flg.short_name, None)
+        self.assertEqual(flg.description, "description")
 
     def test_complex_description(self):
         flg = self.parser.flag(
             "--long-name -s "
             "[This is a big description, with \\[brackets\\] and spaces]"
         )
-        self.assertEquals(flg.long_name, "--long-name")
-        self.assertEquals(flg.short_name, "-s")
-        self.assertEquals(
+        self.assertEqual(flg.long_name, "--long-name")
+        self.assertEqual(flg.short_name, "-s")
+        self.assertEqual(
             flg.description, "This is a big description, with [brackets] and spaces"
         )
