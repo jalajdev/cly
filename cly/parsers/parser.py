@@ -110,6 +110,7 @@ class Parser:
         long_name: str,
         description: str,
         short_name: Union[str, None] = None,
+        metavar: Union[str, None] = None,
         indefinite: bool = False,
         default: Any = None,
     ) -> Argument:
@@ -122,23 +123,23 @@ class Parser:
             The longer name of the argument. Generally of the form
             `--<actual-name>`. For example: $ tsc --project file.
 
+        - description: [str]
+            The text to show in help menus for this argument.
+
         - short_name: [str, default: None]
             The short name of the argument. Generally of the form
             `-<a-single-char>`. Example: $ tsc -p file.
 
-        - description: [str]
-            The text to show in help menus for this argument.
-
-        - required: [bool, default: True]
-            Whether this argument is required.
+        - metavar: [str, default: None]
+            The name used tto reference to his variable in help
+            messages.
 
         - indefinite: [bool, default: False]
             Does this accept indefinite number of values?
 
         - default: [Any, default: None]
             The value that the argument takes if none is supplied by
-            the user. This argument will have effect only if `argument`
-            is set to False.
+            the user.
 
         Returns: An instance of the `Argument` class.
 
@@ -197,6 +198,7 @@ class Parser:
             long_name=long_name,
             description=description,
             short_name=short_name,
+            metavar=metavar,
             required=default is None,
             indefinite=indefinite,
             value=default,
@@ -220,7 +222,7 @@ class Parser:
             The string that specifies the whole specification.
             It must be of this format:
 
-            `"<long-name> <short-name> [<description>], <required>,
+            `"<long-name> <short-name> [<description>], <metavar>, <required>,
             <indefinite>"`
 
             Please take special care of the spaces present and that
@@ -230,7 +232,7 @@ class Parser:
         """
         SPEC_RE = (
             "(?P<long_name>[a-zA-Z0-9\\-_]+)( (?P<short_name>[a-zA-Z0-9\\-_]+))? "
-            "(?P<description>\\[.+(?<!\\\\)\\])"
+            "(?P<description>\\[.+(?<!\\\\)\\])(, (?P<metavar>[\w\\-_]+))?"  # noqa: W605
             "(, (?P<indefinite>[a-zA-Z]+)(, (?P<default>.+))?)?"
         )
         _spec = re.match(SPEC_RE, spec)

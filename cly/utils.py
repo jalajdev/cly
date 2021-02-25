@@ -28,6 +28,7 @@ class Argument:
     long_name: str
     description: str
     short_name: Union[str, None] = None
+    metavar: Union[str, None] = None
     required: bool = True
     indefinite: bool = False
 
