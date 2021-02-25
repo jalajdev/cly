@@ -110,7 +110,6 @@ class Parser:
         long_name: str,
         description: str,
         short_name: Union[str, None] = None,
-        required: bool = True,
         indefinite: bool = False,
         default: Any = None,
     ) -> Argument:
@@ -198,9 +197,9 @@ class Parser:
             long_name=long_name,
             description=description,
             short_name=short_name,
-            required=required,
+            required=default is None,
             indefinite=indefinite,
-            value=(None if required else default),
+            value=default,
         )
 
         self.registry[long_name] = _obj
@@ -232,7 +231,7 @@ class Parser:
         SPEC_RE = (
             "(?P<long_name>[a-zA-Z0-9\\-_]+)( (?P<short_name>[a-zA-Z0-9\\-_]+))? "
             "(?P<description>\\[.+(?<!\\\\)\\])"
-            "(, (?P<required>[a-zA-Z]+)(, (?P<indefinite>[a-zA-Z]+))?)?"
+            "(, (?P<indefinite>[a-zA-Z]+)(, (?P<default>.+))?)?"
         )
         _spec = re.match(SPEC_RE, spec)
         if _spec is None:
@@ -243,9 +242,6 @@ class Parser:
             raise Exception("Invalid spec provided")
 
         _spec = _spec.groupdict()
-
-        # Fallsback to True by default
-        _spec["required"] = str(_spec.get("required")).lower() != "false"
 
         # Fallsback to False by default
         _spec["indefinite"] = str(_spec.get("indefinite")).lower() == "true"

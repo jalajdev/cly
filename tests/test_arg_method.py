@@ -52,26 +52,27 @@ class TestArgMethodRegExps(unittest.TestCase):
         self.assertEquals(arg.required, True)
         self.assertEquals(arg.indefinite, False)
 
-    def test_required_parameter(self):
+    def test_indefinite_parameter(self):
         arg = self.parser.add_arg("--long-name -s [description], False")
+        self.assertEquals(arg.long_name, "--long-name")
+        self.assertEquals(arg.short_name, "-s")
+        self.assertEquals(arg.description, "description")
+        self.assertEquals(arg.required, True)
+        self.assertEquals(arg.indefinite, False)
+
+    def test_indefinite_parameter_case_insensitive(self):
+        arg = self.parser.add_arg("--long-name -s [description], false")
+        self.assertEquals(arg.indefinite, False)
+
+    def test_default_parameter(self):
+        arg = self.parser.add_arg("--long-name -s [description], false, default value")
         self.assertEquals(arg.long_name, "--long-name")
         self.assertEquals(arg.short_name, "-s")
         self.assertEquals(arg.description, "description")
         self.assertEquals(arg.required, False)
         self.assertEquals(arg.indefinite, False)
+        self.assertEqual(arg.value, "default value")
 
-    def test_required_parameter_case_insensitive(self):
+    def test_empty_default_parameter(self):
         arg = self.parser.add_arg("--long-name -s [description], false")
-        self.assertEquals(arg.required, False)
-
-    def test_indefinite_parameter(self):
-        arg = self.parser.add_arg("--long-name -s [description], true, True")
-        self.assertEquals(arg.long_name, "--long-name")
-        self.assertEquals(arg.short_name, "-s")
-        self.assertEquals(arg.description, "description")
-        self.assertEquals(arg.required, True)
-        self.assertEquals(arg.indefinite, True)
-
-    def test_indefinite_parameter_case_insensitive(self):
-        arg = self.parser.add_arg("--long-name -s [description], true, true")
-        self.assertEquals(arg.indefinite, True)
+        self.assertEqual(arg.value, None)
