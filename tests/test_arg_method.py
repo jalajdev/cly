@@ -62,7 +62,7 @@ class TestArgMethodRegExps(unittest.TestCase):
 
     def test_required_parameter_case_insensitive(self):
         arg = self.parser.add_arg("--long-name -s [description], false")
-        self.assertEquals(arg.indefinite, False)
+        self.assertEquals(arg.required, False)
 
     def test_indefinite_parameter(self):
         arg = self.parser.add_arg("--long-name -s [description], true, True")
