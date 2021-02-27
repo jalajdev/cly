@@ -71,6 +71,12 @@ def gen_help(
     left_column = inst.long_name + s_name
     right_column = inst.description
 
+    if type(inst) == Argument and inst.metavar:
+        if inst.indefinite:
+            left_column += f"  <{inst.metavar}1> <{inst.metavar}2> ... <{inst.metavar}n>"
+        else:
+            left_column += f" <{inst.metavar}>"
+
     while left_column != "" or right_column != "":
         # Handle left column
         if len(left_column) <= left_width:

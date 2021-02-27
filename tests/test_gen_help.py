@@ -200,3 +200,52 @@ class TestGenHelpFunction(unittest.TestCase):
                 "                 t in one line\n"
             ),
         )
+
+    def test_with_metavar(self):
+        long_name = "--file"
+        short_name = "-f"
+        description = (
+            "Some good description that is going to be very big"
+            " and will not fit in one line"
+        )
+        self.assertEqual(
+            gen_help(
+                Argument(
+                    long_name=long_name,
+                    short_name=short_name,
+                    description=description,
+                    metavar="filename",
+                ),
+                25,
+                40
+            ),
+            (
+                "--file, -f <filename>      Some good description that is going to b\n"
+                "                           e very big and will not fit in one line\n"
+            ),
+        )
+
+    def test_indefinite_with_metavar(self):
+        long_name = "--file"
+        short_name = "-f"
+        description = (
+            "Some good description that is going to be very big"
+            " and will not fit in one line"
+        )
+        self.assertEqual(
+            gen_help(
+                Argument(
+                    long_name=long_name,
+                    short_name=short_name,
+                    description=description,
+                    metavar="FILE",
+                    indefinite=True
+                ),
+                25,
+                40
+            ),
+            (
+                "--file, -f  <FILE1> <FILE  Some good description that is going to b\n"
+                "2> ... <FILEn>             e very big and will not fit in one line\n"
+            ),
+        )
