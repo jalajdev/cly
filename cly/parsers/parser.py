@@ -96,14 +96,58 @@ class Parser:
             "allow_unknown_args": allow_unknown_args,
             "strict_mode": strict_mode,
         }
-        self.argtree = []
-        self.registry: Dict[str, Argument] = {}
+        self._registry: Dict[str, Union[Flag, Argument]] = {}
+        self._required_args: List[Argument] = []
 
     def parse(self, args: List[str] = sys.argv[1:]) -> None:
         """
         This is the function that performs the actual parsing of
         the args and internally builds up a tree of parsed args.
         """
+        tree = {}
+        n = 0
+
+        def resolve(obj: Union[Argument, Flag], value: str) -> None:
+            tree[obj.dest] = value
+            if obj.required:
+                self._required_args.remove(obj)
+
+        while n < len(args):
+            arg = args[n]
+            if arg in self._registry:
+                _arg_obj = self._registry[arg]
+
+                if type(_arg_obj) == Flag:
+                    resolve(_arg_obj, True)
+                else:
+                    if _arg_obj.indefinite:
+                        _arg_value = []
+                        for j in args[n + 1:]:
+                            if j in self._registry:
+                                break
+                            _arg_value.append(j)
+                        n += len(_arg_value)
+                        if _arg_value == []:
+                            # Wrong usage
+                            # TODO
+                            continue
+                    else:
+                        _arg_value = args[n + 1]
+                        n += 1
+                        if _arg_value.startswith("-") or _arg_value.startswith("--"):
+                            # Wrong usage
+                            # TODO
+                            continue
+
+                    resolve(_arg_obj, _arg_value)
+
+            # TODO
+            # if re.match("[\w\\-_]+=.+", arg):  # noqa: W605
+            #     # To handle arguments similiar to --file="/path/to/file"
+            #     argname, value = arg.split("=")
+
+            n += 1
+        return tree
 
     def add_argument(
         self,
@@ -159,13 +203,13 @@ class Parser:
             raise ValueError("Short name and/or Long names can't be empty strings.")
 
         # Redundancy checks
-        if long_name in self.registry:
+        if long_name in self._registry:
             raise InvalidLongName(
                 f"The long name '{long_name}' is redundant."
                 " It has been registered already."
             )
 
-        if short_name and short_name in self.registry:
+        if short_name and short_name in self._registry:
             raise InvalidShortName(
                 f"The long name '{short_name}' is redundant."
                 " It has been registered already."
@@ -210,9 +254,12 @@ class Parser:
             value=default,
         )
 
-        self.registry[long_name] = _obj
+        self._registry[long_name] = _obj
         if short_name:
-            self.registry[short_name] = _obj
+            self._registry[short_name] = _obj
+
+        if _obj.required:
+            self._required_args.append(_obj)
 
         return _obj
 
@@ -300,13 +347,13 @@ class Parser:
             raise ValueError("Short name and/or Long names can't be empty strings.")
 
         # Redundancy checks
-        if long_name in self.registry:
+        if long_name in self._registry:
             raise InvalidLongName(
                 f"The long name '{long_name}' is redundant."
                 " It has been registered already."
             )
 
-        if short_name and short_name in self.registry:
+        if short_name and short_name in self._registry:
             raise InvalidShortName(
                 f"The long name '{short_name}' is redundant."
                 " It has been registered already."
@@ -347,9 +394,9 @@ class Parser:
             dest=dest,
         )
 
-        self.registry[long_name] = _obj
+        self._registry[long_name] = _obj
         if short_name:
-            self.registry[short_name] = _obj
+            self._registry[short_name] = _obj
 
         return _obj
 
