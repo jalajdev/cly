@@ -24,7 +24,7 @@ class TestArgMethodRegExps(unittest.TestCase):
         return super().setUp()
 
     def test_basic_sample(self):
-        arg = self.parser.add_arg("--long-name -s [description]")
+        arg = self.parser.add_arg("--long-name -s [description]", dest="dest")
         self.assertEqual(arg.long_name, "--long-name")
         self.assertEqual(arg.short_name, "-s")
         self.assertEqual(arg.description, "description")
@@ -32,7 +32,7 @@ class TestArgMethodRegExps(unittest.TestCase):
         self.assertEqual(arg.indefinite, False)
 
     def test_ommitted_short_name(self):
-        arg = self.parser.add_arg("--long-name [description]")
+        arg = self.parser.add_arg("--long-name [description]", dest="dest")
         self.assertEqual(arg.long_name, "--long-name")
         self.assertEqual(arg.short_name, None)
         self.assertEqual(arg.description, "description")
@@ -42,7 +42,8 @@ class TestArgMethodRegExps(unittest.TestCase):
     def test_complex_description(self):
         arg = self.parser.add_arg(
             "--long-name -s "
-            "[This is a big description, with \\[brackets\\] and spaces]"
+            "[This is a big description, with \\[brackets\\] and spaces]",
+            dest="dest",
         )
         self.assertEqual(arg.long_name, "--long-name")
         self.assertEqual(arg.short_name, "-s")
@@ -53,7 +54,9 @@ class TestArgMethodRegExps(unittest.TestCase):
         self.assertEqual(arg.indefinite, False)
 
     def test_metavar(self):
-        arg = self.parser.add_arg("--long-name -s [description], metavar, True")
+        arg = self.parser.add_arg(
+            "--long-name -s [description], metavar, True", dest="dest"
+        )
         self.assertEqual(arg.long_name, "--long-name")
         self.assertEqual(arg.short_name, "-s")
         self.assertEqual(arg.description, "description")
@@ -62,7 +65,9 @@ class TestArgMethodRegExps(unittest.TestCase):
         self.assertEqual(arg.indefinite, True)
 
     def test_indefinite_parameter(self):
-        arg = self.parser.add_arg("--long-name -s [description], metavar, True")
+        arg = self.parser.add_arg(
+            "--long-name -s [description], metavar, True", dest="dest"
+        )
         self.assertEqual(arg.long_name, "--long-name")
         self.assertEqual(arg.short_name, "-s")
         self.assertEqual(arg.description, "description")
@@ -70,12 +75,14 @@ class TestArgMethodRegExps(unittest.TestCase):
         self.assertEqual(arg.indefinite, True)
 
     def test_indefinite_parameter_case_insensitive(self):
-        arg = self.parser.add_arg("--long-name -s [description], metavar, true")
+        arg = self.parser.add_arg(
+            "--long-name -s [description], metavar, true", dest="dest"
+        )
         self.assertEqual(arg.indefinite, True)
 
     def test_default_parameter(self):
         arg = self.parser.add_arg(
-            "--long-name -s [description], metavar, false, default value"
+            "--long-name -s [description], metavar, false, default value", dest = "dest"
         )
         self.assertEqual(arg.long_name, "--long-name")
         self.assertEqual(arg.short_name, "-s")
@@ -85,5 +92,5 @@ class TestArgMethodRegExps(unittest.TestCase):
         self.assertEqual(arg.value, "default value")
 
     def test_empty_default_parameter(self):
-        arg = self.parser.add_arg("--long-name -s [description], false")
+        arg = self.parser.add_arg("--long-name -s [description], false", dest="dest")
         self.assertEqual(arg.value, None)

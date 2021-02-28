@@ -28,19 +28,19 @@ class StylesTest(unittest.TestCase):
 
         # Empty Long name
         with self.assertRaises(ValueError):
-            self.parser.add_flag("", "")
+            self.parser.add_flag("", "", dest="dest")
 
     def test_empty_short_name(self):
 
         # Empty short name
         with self.assertRaises(ValueError):
-            self.parser.add_flag("--abcd", "", short_name="")
+            self.parser.add_flag("--abcd", "", short_name="", dest="dest")
 
     def test_hyphen_is_valid_in_long_name(self):
 
         # Long name with '-' must not count as special character
         try:
-            self.parser.add_flag("--ab-cd", "")
+            self.parser.add_flag("--ab-cd", "", dest="dest")
         except Exception:
             self.assertTrue(False)
 
@@ -48,7 +48,7 @@ class StylesTest(unittest.TestCase):
 
         # Short name with '-' must not count as special character
         try:
-            self.parser.add_flag("--abcd", "", short_name="-c")
+            self.parser.add_flag("--abcd", "", short_name="-c", dest="dest")
         except Exception:
             self.assertTrue(False)
 
@@ -63,31 +63,31 @@ class StrictModeStylesTest(unittest.TestCase):
 
         # Empty Long name
         with self.assertRaises(ValueError):
-            self.parser.add_flag("", "")
+            self.parser.add_flag("", "", dest="dest")
 
     def test_empty_short_name(self):
 
         # Empty short name
         with self.assertRaises(ValueError):
-            self.parser.add_flag("--abcd", "", short_name="")
+            self.parser.add_flag("--abcd", "", short_name="", dest="dest")
 
     def test_special_char_in_long_name(self):
 
         # Long name with special character
         with self.assertRaises(InvalidLongName):
-            self.parser.add_flag("--$#as", "")
+            self.parser.add_flag("--$#as", "", dest="dest")
 
     def test_special_char_in_short_name(self):
 
         # Short name with special character
         with self.assertRaises(InvalidShortName):
-            self.parser.add_flag("--abcd", "", "-&")
+            self.parser.add_flag("--abcd", "", short_name="-&", dest="dest")
 
     def test_hyphen_is_valid_in_long_name(self):
 
         # Long name with '-' must not count as special character
         try:
-            self.parser.add_flag("--ab-cd", "")
+            self.parser.add_flag("--ab-cd", "", dest="dest")
         except Exception:
             self.assertTrue(False)
 
@@ -95,7 +95,7 @@ class StrictModeStylesTest(unittest.TestCase):
 
         # Short name with '-' must not count as special character
         try:
-            self.parser.add_flag("--abcd", "", short_name="-c")
+            self.parser.add_flag("--abcd", "", short_name="-c", dest="dest")
         except Exception:
             self.assertTrue(False)
 
@@ -103,19 +103,19 @@ class StrictModeStylesTest(unittest.TestCase):
 
         # Long name starting with something other than `--`.
         with self.assertRaises(InvalidLongName):
-            self.parser.add_flag("abcd", "", "-b")
+            self.parser.add_flag("abcd", "", short_name="-b", dest="dest")
 
     def test_short_name_starts_with_hyphen(self):
 
         # Short name starting with something other than `-`.
         with self.assertRaises(InvalidShortName):
-            self.parser.add_flag("--abcd", "", "cb")
+            self.parser.add_flag("--abcd", "", short_name="cb", dest="dest")
 
     def test_fixed_length_short_name(self):
 
         # Short name too long.
         with self.assertRaises(InvalidShortName):
-            self.parser.add_flag("--abcd", "", "-cb")
+            self.parser.add_flag("--abcd", "", short_name="-cb", dest="dest")
 
 
 class FunctionalityTests(unittest.TestCase):
@@ -124,11 +124,11 @@ class FunctionalityTests(unittest.TestCase):
         return super().setUp()
 
     def test_redundancy_error_in_long_name(self):
-        self.parser.add_flag("--name1", "")
+        self.parser.add_flag("--name1", "", dest="dest")
         with self.assertRaises(InvalidLongName):
-            self.parser.add_flag("--name1", "")
+            self.parser.add_flag("--name1", "", dest="dest")
 
     def test_redundancy_error_in_short_name(self):
-        self.parser.add_flag("--name1", "", "-n")
+        self.parser.add_flag("--name1", "", short_name="-n", dest="dest")
         with self.assertRaises(InvalidShortName):
-            self.parser.add_flag("--name2", "", "-n")
+            self.parser.add_flag("--name2", "", short_name="-n", dest="dest")

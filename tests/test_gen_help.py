@@ -31,7 +31,10 @@ class TestGenHelpFunction(unittest.TestCase):
         self.assertEqual(
             gen_help(
                 Argument(
-                    long_name=long_name, short_name=short_name, description=description
+                    long_name=long_name,
+                    short_name=short_name,
+                    description=description,
+                    dest="dest",
                 ),
                 len(long_name) + len(short_name) + 2,
                 len(description),
@@ -48,7 +51,10 @@ class TestGenHelpFunction(unittest.TestCase):
         self.assertEqual(
             gen_help(
                 Flag(
-                    long_name=long_name, short_name=short_name, description=description
+                    long_name=long_name,
+                    short_name=short_name,
+                    description=description,
+                    dest="dest",
                 ),
                 len(long_name) + len(short_name) + 2,
                 len(description),
@@ -63,7 +69,7 @@ class TestGenHelpFunction(unittest.TestCase):
         description = "Some good description"
         self.assertEqual(
             gen_help(
-                Argument(long_name=long_name, description=description),
+                Argument(long_name=long_name, description=description, dest="dest"),
                 len(long_name),
                 len(description),
             ),
@@ -71,7 +77,7 @@ class TestGenHelpFunction(unittest.TestCase):
         )
         self.assertEqual(
             gen_help(
-                Flag(long_name=long_name, description=description),
+                Flag(long_name=long_name, description=description, dest="dest"),
                 len(long_name),
                 len(description),
             ),
@@ -88,7 +94,10 @@ class TestGenHelpFunction(unittest.TestCase):
         self.assertEqual(
             gen_help(
                 Argument(
-                    long_name=long_name, short_name=short_name, description=description
+                    long_name=long_name,
+                    short_name=short_name,
+                    description=description,
+                    dest="dest",
                 ),
                 len(long_name) + len(short_name) + 2 + extra_padding,
                 len(description),
@@ -108,7 +117,10 @@ class TestGenHelpFunction(unittest.TestCase):
         self.assertEqual(
             gen_help(
                 Argument(
-                    long_name=long_name, short_name=short_name, description=description
+                    long_name=long_name,
+                    short_name=short_name,
+                    description=description,
+                    dest="dest",
                 ),
                 len(long_name) + len(short_name) + 2,
                 20,  # Any arbitrary number
@@ -133,7 +145,10 @@ class TestGenHelpFunction(unittest.TestCase):
         self.assertEqual(
             gen_help(
                 Argument(
-                    long_name=long_name, short_name=short_name, description=description
+                    long_name=long_name,
+                    short_name=short_name,
+                    description=description,
+                    dest="dest",
                 ),
                 12,
                 20,
@@ -161,7 +176,10 @@ class TestGenHelpFunction(unittest.TestCase):
         self.assertEqual(
             gen_help(
                 Argument(
-                    long_name=long_name, short_name=short_name, description=description
+                    long_name=long_name,
+                    short_name=short_name,
+                    description=description,
+                    dest="dest",
                 ),
                 12.4,
                 19.8,
@@ -191,7 +209,10 @@ class TestGenHelpFunction(unittest.TestCase):
         self.assertEqual(
             gen_help(
                 Argument(
-                    long_name=long_name, short_name=short_name, description=description
+                    long_name=long_name,
+                    short_name=short_name,
+                    description=description,
+                    dest="dest",
                 ),
             ),
             (
@@ -214,10 +235,11 @@ class TestGenHelpFunction(unittest.TestCase):
                     long_name=long_name,
                     short_name=short_name,
                     description=description,
+                    dest="dest",
                     metavar="filename",
                 ),
                 25,
-                40
+                40,
             ),
             (
                 "--file, -f <filename>      Some good description that is going to b\n"
@@ -238,11 +260,12 @@ class TestGenHelpFunction(unittest.TestCase):
                     long_name=long_name,
                     short_name=short_name,
                     description=description,
+                    dest="dest",
                     metavar="FILE",
-                    indefinite=True
+                    indefinite=True,
                 ),
                 25,
-                40
+                40,
             ),
             (
                 "--file, -f  <FILE1> <FILE  Some good description that is going to b\n"

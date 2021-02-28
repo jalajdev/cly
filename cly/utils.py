@@ -27,6 +27,7 @@ class Argument:
 
     long_name: str
     description: str
+    dest: str
     short_name: Union[str, None] = None
     metavar: Union[str, None] = None
     required: bool = True
@@ -45,7 +46,9 @@ class Flag:
 
     long_name: str
     description: str
+    dest: str
     short_name: Union[str, None] = None
+    metavar: Union[str, None] = None
     value: bool = False
 
 
@@ -73,7 +76,9 @@ def gen_help(
 
     if type(inst) == Argument and inst.metavar:
         if inst.indefinite:
-            left_column += f"  <{inst.metavar}1> <{inst.metavar}2> ... <{inst.metavar}n>"
+            left_column += (
+                f"  <{inst.metavar}1> <{inst.metavar}2> ... <{inst.metavar}n>"
+            )
         else:
             left_column += f" <{inst.metavar}>"
 

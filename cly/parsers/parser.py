@@ -109,6 +109,7 @@ class Parser:
         self,
         long_name: str,
         description: str,
+        dest: str,
         short_name: Union[str, None] = None,
         metavar: Union[str, None] = None,
         indefinite: bool = False,
@@ -123,6 +124,10 @@ class Parser:
             The longer name of the argument. Generally of the form
             `--<actual-name>`. For example: $ tsc --project file.
 
+        - dest: [str]
+            The name that will be used to access the value of this
+            argument later in your program.
+
         - description: [str]
             The text to show in help menus for this argument.
 
@@ -131,7 +136,7 @@ class Parser:
             `-<a-single-char>`. Example: $ tsc -p file.
 
         - metavar: [str, default: None]
-            The name used tto reference to his variable in help
+            The name used to reference to his variable in help
             messages.
 
         - indefinite: [bool, default: False]
@@ -199,6 +204,7 @@ class Parser:
             description=description,
             short_name=short_name,
             metavar=metavar,
+            dest=dest,
             required=default is None,
             indefinite=indefinite,
             value=default,
@@ -210,7 +216,7 @@ class Parser:
 
         return _obj
 
-    def add_arg(self, spec: str) -> Argument:
+    def add_arg(self, spec: str, dest: str) -> Argument:
         """
         Shorthand for the function `add_argument`. Instead of all the
         different parameters, you can provide just a singe string
@@ -254,12 +260,13 @@ class Parser:
             .replace("\\[", "[").replace("\\]", "]")
         )
 
-        return self.add_argument(**_spec)
+        return self.add_argument(**_spec, dest=dest)
 
     def add_flag(
         self,
         long_name: str,
         description: str,
+        dest: str,
         short_name: Union[str, None] = None,
     ) -> Flag:
         """
@@ -274,12 +281,16 @@ class Parser:
             The longer name of the flag. Generally of the form
             `--<actual-name>`. For example: $ git add --all.
 
+        - description: [str]
+            The text to show in help menus for this flag.
+
+        - dest: [str]
+            The name that will be used to access the value of this
+            argument later in your program.
+
         - short_name: [str, default: None]
             The short name of the flag. Generally of the form
             `-<a-single-char>`. Example: $ git add -A.
-
-        - description: [str]
-            The text to show in help menus for this flag.
 
         Returns: An instance of the `Flag` class.
         """
@@ -333,6 +344,7 @@ class Parser:
             long_name=long_name,
             description=description,
             short_name=short_name,
+            dest=dest,
         )
 
         self.registry[long_name] = _obj
@@ -341,7 +353,7 @@ class Parser:
 
         return _obj
 
-    def flag(self, spec: str) -> Flag:
+    def flag(self, spec: str, dest: str) -> Flag:
         """
         Shorthand for the function `add_flag`. Instead of all the
         different parameters, you can provide just a singe string
@@ -380,4 +392,4 @@ class Parser:
             .replace("\\[", "[").replace("\\]", "]")
         )
 
-        return self.add_flag(**_spec)
+        return self.add_flag(**_spec, dest=dest)
