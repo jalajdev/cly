@@ -17,7 +17,7 @@
 import re
 import sys
 from cly.utils import Argument, Flag
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, NoReturn, Union
 from cly.errors import InvalidLongName, InvalidShortName
 
 
@@ -57,9 +57,10 @@ class Parser:
             message will be generated dynamically during runtime.
 
         - help_flag: [str, default: "-h, --help"]
-            The flag that will trigger the dynamic generation and
-            thereafter writing it to `stdout`. It must be of the form
-            "<short-name>, <long-name>". For example: "-h, --help".
+            The flag that will trigger the dynamic generation of help
+            message and thereafter writing it to `stdout`. It must be
+            of the form "<short-name>, <long-name>".
+            Example: "-h, --help".
 
         - allow_unknown_args: [bool, default: False]
             Whether the program should silently ignore unknown
@@ -87,6 +88,9 @@ class Parser:
             Moreover, it _enforces_ a style in your program with which
             most users are already familiar.
         """
+        help_flag = help_flag.split(", ")
+        if len(help_flag) != 2:
+            raise ValueError("Wrong value of help_flag provided.")
         self._options = {
             "prog": prog,
             "desc": desc,
@@ -109,8 +113,20 @@ class Parser:
 
         def resolve(obj: Union[Argument, Flag], value: str) -> None:
             tree[obj.dest] = value
-            if obj.required:
+            if type(obj) == Argument and obj.required:
                 self._required_args.remove(obj)
+
+        def reject(reason: str, more_help: str = "") -> NoReturn:
+            print(self._options["prog"] + ":", reason)
+            if more_help:
+                print(more_help)
+            print(
+                "\nUse {prog_name} {help_arg_name} for detailed help message".format(
+                    prog_name=self._options["prog"],
+                    help_arg_name=self._options["help_flag"][1],
+                )
+            )
+            raise SystemExit()
 
         while n < len(args):
             arg = args[n]
@@ -122,22 +138,43 @@ class Parser:
                 else:
                     if _arg_obj.indefinite:
                         _arg_value = []
-                        for j in args[n + 1:]:
+                        for j in args[n + 1 :]:  # noqa: E203
                             if j in self._registry:
                                 break
                             _arg_value.append(j)
                         n += len(_arg_value)
                         if _arg_value == []:
-                            # Wrong usage
-                            # TODO
-                            continue
+                            _meta = _arg_obj.metavar or "value"
+                            usage = f"<{_meta}1> <{_meta}2> ... <{_meta}n>"
+                            reject(
+                                reason=f"{arg} is an argument and it requires some value to work",
+                                more_help="\nCorrect usage:\n\t"
+                                f"{self._options['prog']} {arg} {usage}"
+                                "\n\nDescription:\n\t" + _arg_obj.description,
+                            )
                     else:
-                        _arg_value = args[n + 1]
                         n += 1
-                        if _arg_value.startswith("-") or _arg_value.startswith("--"):
-                            # Wrong usage
-                            # TODO
-                            continue
+                        _arg_value = n < len(args) and args[n]
+                        if (
+                            not _arg_value
+                            or _arg_value.startswith("-")
+                            or _arg_value.startswith("--")
+                        ):
+                            usage = (
+                                self._options["prog"]
+                                + " "
+                                + arg
+                                + " <"
+                                + (_arg_obj.metavar or "value")
+                                + ">"
+                            )
+                            reject(
+                                reason=f"{arg} is an argument and it requires some value to work",
+                                more_help="\nCorrect usage:\n\t"
+                                + usage
+                                + "\n\nDescription:\n\t"
+                                + _arg_obj.description,
+                            )
 
                     resolve(_arg_obj, _arg_value)
 
