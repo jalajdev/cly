@@ -177,11 +177,80 @@ class Parser:
                             )
 
                     resolve(_arg_obj, _arg_value)
+                    del _arg_value
 
-            # TODO
-            # if re.match("[\w\\-_]+=.+", arg):  # noqa: W605
-            #     # To handle arguments similiar to --file="/path/to/file"
-            #     argname, value = arg.split("=")
+            elif re.match("[\w\\-_]+=.+", arg):  # noqa: W605
+                # To handle arguments similiar to --file="/path/to/file"
+                arg, value = arg.split("=")
+                if arg in self._registry:
+                    resolve(self._registry[arg], value)
+
+            # To handle flags in shorthand cluster mode
+            # That is, to handle clustering like: program.py -abcd
+            elif self._options["strict_mode"] and re.match("-\w+", arg):  # noqa: W605
+                flags = arg[1:]
+                for flag in flags:
+                    flag = "-" + flag
+                    if flag in self._registry:
+                        _arg_obj = self._registry[flag]
+                        if type(_arg_obj) == Flag:
+                            resolve(_arg_obj, True)
+
+                        # Arguments are allowed at last place
+                        elif flag[1:] == flags[-1]:
+
+                            if _arg_obj.indefinite:
+                                _arg_value = []
+                                for j in args[n + 1 :]:  # noqa: E203
+                                    if j in self._registry:
+                                        break
+                                    _arg_value.append(j)
+                                n += len(_arg_value)
+                                if _arg_value == []:
+                                    _meta = _arg_obj.metavar or "value"
+                                    usage = f"<{_meta}1> <{_meta}2> ... <{_meta}n>"
+                                    reject(
+                                        reason=f"{arg} is an argument "
+                                        "and it requires some value to work",
+                                        more_help="\nCorrect usage:\n\t"
+                                        f"{self._options['prog']} {arg} {usage}"
+                                        "\n\nDescription:\n\t" + _arg_obj.description,
+                                    )
+                            else:
+                                n += 1
+                                _arg_value = n < len(args) and args[n]
+                                if (
+                                    not _arg_value
+                                    or _arg_value.startswith("-")
+                                    or _arg_value.startswith("--")
+                                ):
+                                    usage = (
+                                        self._options["prog"]
+                                        + " "
+                                        + arg
+                                        + " <"
+                                        + (_arg_obj.metavar or "value")
+                                        + ">"
+                                    )
+                                    reject(
+                                        reason=f"{arg} is an argument "
+                                        "and it requires some value to work",
+                                        more_help="\nCorrect usage:\n\t"
+                                        + usage
+                                        + "\n\nDescription:\n\t"
+                                        + _arg_obj.description,
+                                    )
+
+                            resolve(_arg_obj, _arg_value)
+                        else:
+                            reject(
+                                reason="Arguments are allowed only at the last place "
+                                "in shorthand cluster mode"
+                            )
+                    elif not self._options["allow_unknown_args"]:
+                        reject(reason=f"{flag} is not a recognised flag or argument")
+            elif not self._options["allow_unknown_args"]:
+                reject(reason=f"{flag} is not a recognised flag or argument")
 
             n += 1
         return tree
